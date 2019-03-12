@@ -1,13 +1,13 @@
 library(dplyr)
 library(outbreaks)
-library(rstan)
 
 ll <- mers_korea_2015$linelist
 
 ## This assumes that the first person infected is most likely infector
-cc <- mers_korea_2015$contacts %>% 
-	group_by(to) %>%
-	filter(diff_dt_onset == max(diff_dt_onset))
+cc <- (mers_korea_2015$contacts
+	%>% group_by(to)
+	%>% filter(diff_dt_onset == max(diff_dt_onset)
+)
 
 mers_korea_2015$contacts %>% 
 	group_by(to) %>% 
