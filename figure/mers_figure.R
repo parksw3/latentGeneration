@@ -9,7 +9,7 @@ cc <- mers_korea_2015$contacts %>%
 	group_by(to) %>%
 	filter(diff_dt_onset == max(diff_dt_onset))
 
-load("../analysis/mers_analysis_full.rda")
+load("../analysis/mers_analysis_full_relax.rda")
 
 ee <- rstan::extract(genfit)
 
@@ -223,7 +223,6 @@ rdistribution <- lapply(1:2000, function(x){
 	)
 
 ddata <- bind_rows(gdistribution, idistribution, rdistribution)
-
 
 gdistr <- ggplot(ddata) +
 	geom_ribbon(aes(t, ymin=lwr, ymax=upr), alpha=0.2) +
