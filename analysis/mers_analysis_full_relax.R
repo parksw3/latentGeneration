@@ -1,8 +1,16 @@
+## Uses relaxed priors
+## Daniel should refactor and stop spawning pseudo-copies
+
 library(dplyr)
 library(outbreaks)
 library(rstan)
 
+
 ll <- mers_korea_2015$linelist
+d0 <- as.numeric(min(ll$dt_start_exp, na.rm=TRUE))
+d1 <- 23
+
+## This assumes that the first person infected is most likely infector
 cc <- mers_korea_2015$contacts %>% 
 	group_by(to) %>%
 	filter(diff_dt_onset == max(diff_dt_onset))
@@ -19,16 +27,16 @@ flevel <- ll$id
 standata <- data_frame(
 	patient=as.numeric(factor(ll$id, level=flevel)),
 	from=as.numeric(factor(cc$from[match(flevel, cc$to)], level=flevel)),
-	dt_start_exp=as.numeric(ll$dt_start_exp)-16543,
-	dt_end_exp=as.numeric(ll$dt_end_exp)-16543,
-	dt_onset=as.numeric(ll$dt_onset)-16543,
-	dt_report=as.numeric(ll$dt_report)-16543
+	dt_start_exp=as.numeric(ll$dt_start_exp)-d0,
+	dt_end_exp=as.numeric(ll$dt_end_exp)-d0,
+	dt_onset=as.numeric(ll$dt_onset)-d0,
+	dt_report=as.numeric(ll$dt_report)-d0
 ) %>%
 	mutate(
-		dt_start_exp=ifelse((dt_start_exp <= dt_onset[from] & !is.na(from)) | is.na(dt_start_exp), dt_onset[from], dt_start_exp),
+		dt_start_exp=ifelse((dt_start_exp < dt_onset[from] & !is.na(from)) | is.na(dt_start_exp), dt_onset[from], dt_start_exp),
 		dt_end_exp=pmax(pmin(dt_end_exp, dt_onset, na.rm=TRUE), dt_start_exp, na.rm=TRUE),
 		dt_start_exp=dt_start_exp + ifelse(dt_start_exp==dt_end_exp, -1, 0),
-		dt_start_exp=ifelse(is.na(dt_start_exp), 23, dt_start_exp), 
+		dt_start_exp=ifelse(is.na(dt_start_exp), d1, dt_start_exp), 
 		from=ifelse(is.na(from), -1, from),
 		missing_onset=as.numeric(is.na(dt_onset)),
 		missing_end_exp=as.numeric(is.na(dt_end_exp)),

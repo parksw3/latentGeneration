@@ -23,6 +23,8 @@ Sources += $(wildcard *.R)
 
 data.Rout: data.R
 
+mers_analysis_full_relax.Rout: mers_analysis_full_relax.R
+
 ######################################################################
 
 ### Makestuff
